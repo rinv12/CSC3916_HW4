@@ -133,7 +133,6 @@ router.route('/movies')
                     }
                     else if (movie) {
                         res.status(200).json({success: true, message: "movie found", Movie: movie});
-                        if(req.body.reviews === "true"){
                             var findReview = new Review();
                             findReview.title = req.body.title;
                             findReview.name = req.body.name;
@@ -146,7 +145,6 @@ router.route('/movies')
                                     res.status(200).json({success: true, title: review.title, name: review.name, quote: review.quote, rating: review.rating});
                                 }
                             })
-                        }
                     } else {
                         res.status(404).json({success: false, message: "movie not found"});
                     }
