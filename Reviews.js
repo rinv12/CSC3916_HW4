@@ -18,7 +18,7 @@ var reviewSchema = new Schema({
     comment: {type: String, required: true},
     rating: {type: Number, required: true, min: 1, max: 5}
 });
-reviewSchema.pre('save', function (next){
-    next();
-})
+// reviewSchema.pre('save', function (next){
+//     next();
+// })
 module.exports = mongoose.model('Review', reviewSchema);

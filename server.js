@@ -221,7 +221,7 @@ router.route('/reviews')
     })
     .post(authJwtController.isAuthenticated, function (req,res){
         console.log(req.body);
-        if(!req.body.title || !req.body.user || !req.body.quote || !req.body.rating) {
+        if(!req.body.title || !req.body.user || !req.body.comment || !req.body.rating) {
             return res.json({success: false, message: "title, username, comment, rating required"});
         }else{
             var movieReview = new Review();
@@ -233,7 +233,7 @@ router.route('/reviews')
                 } else {
                     movieReview.title = req.body.title;
                     movieReview.user = req.body.user;
-                    movieReview.comment = req.body.quote;
+                    movieReview.comment = req.body.comment;
                     movieReview.rating = req.body.rating;
 
                     movieReview.save(function (err) {
