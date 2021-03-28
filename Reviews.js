@@ -12,10 +12,12 @@ try{
 mongoose.set('useCreateIndex', true);
 
 var reviewSchema = new Schema({
-    name: {type: String, required: true},
+    username: {type: String, required: true},
     title: {type: String, required: true},
     quote: {type: String, required: true},
-    rating: {type: String, required: true}
+    rating: {type: Number, required: true, min: 1, max: 5}
 });
-
+reviewSchema.pre('save', function (next){
+    next();
+})
 module.exports = mongoose.model('Review', reviewSchema);

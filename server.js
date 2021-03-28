@@ -135,7 +135,7 @@ router.route('/movies')
                         res.status(200).json({success: true, message: "movie found", Movie: movie});
                             var findReview = new Review();
                             findReview.title = req.body.title;
-                            findReview.name = req.body.name;
+                            findReview.name = req.body.username;
                             findReview.quote = req.body.quote;
                             findReview.rating = req.body.rating;
                             Review.findOne({title: findReview.title}, function (err, review){
@@ -192,6 +192,62 @@ router.route('/movies')
         res.json({success:false, message: "route not supported"});
     })
 
+
+router.route('/reviews')
+    .get(function (req, res){
+        if(req.query.reviews == "true"){
+            Movie.findOne({title: req.body.title}, function(err, movie){
+                if(!movie){
+                    return res.status(400).json({success: false, message: "movie doesnt exist"});
+                }else if(err){
+                    return res.status(400).json({success: false, message: "unable to find movie"});
+                }else{
+                    Movie.aggregate([
+                        {$match : {title: req.body.title}},
+                        {$lookup : {from: "reviews", localField: "title", foreignField: "title", as : "review"}},
+                        {$addField: {movieRating: {$avg: "$review.rating"}}}
+                    ]).exec(function (err, movie){
+                        if (err){
+                            return res.json(err);
+                        }else{
+                            return res.json(movie);
+                        }
+                    })
+                }
+            })
+        }else{
+            res.json({success: false, message: "provide movie title"});
+        }
+    })
+    .post(authJwtController.isAuthenticated, function (req,res){
+        console.log(req.body);
+        if(req.body.title || req.body.username || req.body.quote || req.body.rating) {
+            res.json({success: true, message: "movie found"});
+            var movieReview = new Review();
+            Movie.findOne({title: req.body.title}, function (err, movie) {
+                if (err) {
+                    return res.status(400).json({success: false, message: "Unable to post review"});
+                } else if (!movie) {
+                    return res.status(400).json({success: false, message: "Movie doesnt exist"});
+                } else {
+                    movieReview.title = req.body.title;
+                    movieReview.user = req.body.username;
+                    movieReview.comment = req.body.quote;
+                    movieReview.rating = req.body.rating;
+
+                    movieReview.save(function (err) {
+                        if (err) {
+                            return res.json(err);
+                        } else {
+                            return res.json({success: true, message: "review saved"});
+                        }
+                    })
+                }
+            })
+        }else{
+            return res.json({success: false, message: "title, username, comment, rating required"});
+        }
+    })
 app.use('/', router);
 app.listen(process.env.PORT || 8080);
 module.exports = app; // for testing only
