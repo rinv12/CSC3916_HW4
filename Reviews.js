@@ -12,8 +12,9 @@ try{
 mongoose.set('useCreateIndex', true);
 
 var reviewSchema = new Schema({
-    user: {type: String, required: true},
+
     title: {type: String, required: true},
+    user: {type: String, required: true},
     comment: {type: String, required: true},
     rating: {type: Number, required: true, min: 1, max: 5}
 });
