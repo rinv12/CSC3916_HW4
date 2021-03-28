@@ -232,7 +232,7 @@ router.route('/reviews')
                     return res.status(400).json({success: false, message: "Movie doesnt exist"});
                 } else {
                     movieReview.title = req.body.title;
-                    movieReview.user = req.body.username;
+                    movieReview.user = req.body.user;
                     movieReview.comment = req.body.quote;
                     movieReview.rating = req.body.rating;
 
