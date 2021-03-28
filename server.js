@@ -221,7 +221,7 @@ router.route('/reviews')
     })
     .post(authJwtController.isAuthenticated, function (req,res){
         console.log(req.body);
-        if(!req.body.title || !req.body.username || !req.body.quote || !req.body.rating) {
+        if(!req.body.title || !req.body.user || !req.body.quote || !req.body.rating) {
             return res.json({success: false, message: "title, username, comment, rating required"});
         }else{
             var movieReview = new Review();
