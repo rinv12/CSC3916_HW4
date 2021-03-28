@@ -221,8 +221,9 @@ router.route('/reviews')
     })
     .post(authJwtController.isAuthenticated, function (req,res){
         console.log(req.body);
-        if(req.body.title || req.body.username || req.body.quote || req.body.rating) {
-            res.json({success: true, message: "movie found"});
+        if(!req.body.title || !req.body.username || !req.body.quote || !req.body.rating) {
+            return res.json({success: false, message: "title, username, comment, rating required"});
+        }else{
             var movieReview = new Review();
             Movie.findOne({title: req.body.title}, function (err, movie) {
                 if (err) {
@@ -244,8 +245,6 @@ router.route('/reviews')
                     })
                 }
             })
-        }else{
-            return res.json({success: false, message: "title, username, comment, rating required"});
         }
     })
 app.use('/', router);
