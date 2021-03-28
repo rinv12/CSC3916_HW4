@@ -29,11 +29,11 @@ var movieSchema = new Schema({
         enum:["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Thriller", "Western"],
     },
     actors:
-    [
-        {actor_name: {type: String, required: true}, character_name:{type:String, required: true}},
-        {actor_name: {type: String, required: true}, character_name:{type:String, required: true}},
-        {actor_name: {type: String, required: true}, character_name:{type:String, required: true}}]
+        [
+            {actor_name: {type: String, required: true}, character_name:{type:String, required: true}},
+            {actor_name: {type: String, required: true}, character_name:{type:String, required: true}},
+            {actor_name: {type: String, required: true}, character_name:{type:String, required: true}}]
 });
 
 //exporting model back to the server
-module.exports = mongoose.model('Movies', movieSchema)
+module.exports = mongoose.model('Movie', movieSchema)

@@ -13,6 +13,7 @@ var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var User = require('./Users');
 var Movie = require('./Movies');
+var Review = require('./Reviews');
 
 var app = express();
 app.use(cors());
@@ -43,53 +44,53 @@ function getJSONObjectForMovieRequirement(req) {
 
 router.route('/signup')
     .post(function(req, res) {
-    if (!req.body.username || !req.body.password) {
-        res.json({success: false, msg: 'Please include both username and password to signup.'})
-    } else {
-        var user = new User();
-        user.name = req.body.name;
-        user.username = req.body.username;
-        user.password = req.body.password;
+        if (!req.body.username || !req.body.password) {
+            res.json({success: false, msg: 'Please include both username and password to signup.'})
+        } else {
+            var user = new User();
+            user.name = req.body.name;
+            user.username = req.body.username;
+            user.password = req.body.password;
 
-        user.save(function(err){
-            if (err) {
-                if (err.code == 11000)
-                    return res.json({ success: false, message: 'A user with that username already exists.'});
-                else
-                    return res.json(err);
-            }
+            user.save(function(err){
+                if (err) {
+                    if (err.code == 11000)
+                        return res.json({ success: false, message: 'A user with that username already exists.'});
+                    else
+                        return res.json(err);
+                }
 
-            res.json({success: true, msg: 'Successfully created new user.'})
-        });
-    }
-})
+                res.json({success: true, msg: 'Successfully created new user.'})
+            });
+        }
+    })
     .all(function (req, res){
         res.json({success: false, msg: 'method not supported'});
     });
 
 router.route('/signin')
     .post(function (req, res) {
-    var userNew = new User();
-    userNew.username = req.body.username;
-    userNew.password = req.body.password;
+        var userNew = new User();
+        userNew.username = req.body.username;
+        userNew.password = req.body.password;
 
-    User.findOne({ username: userNew.username }).select('name username password').exec(function(err, user) {
-        if (err) {
-            res.send(err);
-        }
+        User.findOne({ username: userNew.username }).select('name username password').exec(function(err, user) {
+            if (err) {
+                res.send(err);
+            }
 
-        user.comparePassword(userNew.password, function(isMatch) {
-            if (isMatch) {
-                var userToken = { id: user.id, username: user.username};
-                var token = jwt.sign(userToken, process.env.SECRET_KEY);
-                res.json ({success: true, token: 'JWT ' + token});
-            }
-            else {
-                res.status(401).send({success: false, msg: 'Authentication failed.'});
-            }
+            user.comparePassword(userNew.password, function(isMatch) {
+                if (isMatch) {
+                    var userToken = { id: user.id, username: user.username};
+                    var token = jwt.sign(userToken, process.env.SECRET_KEY);
+                    res.json ({success: true, token: 'JWT ' + token});
+                }
+                else {
+                    res.status(401).send({success: false, msg: 'Authentication failed.'});
+                }
+            })
         })
-    })
-});
+    });
 
 router.route('/movies')
     .put(authJwtController.isAuthenticated, function(req, res){
@@ -130,11 +131,24 @@ router.route('/movies')
                     if (err) {
                         res.status(403).json({success: false, message: "unable to find movie"});
                     }
-                    if (movie) {
-                        res.status(200).json({success: true, message: "movie found", Movie: movie})
+                    else if (movie) {
+                        res.status(200).json({success: true, message: "movie found", Movie: movie});
+                        if(req.body.reviews === "true"){
+                            var findReview = new Review();
+                            findReview.title = req.body.title;
+                            findReview.name = req.body.name;
+                            findReview.quote = req.body.quote;
+                            findReview.rating = req.body.rating;
+                            Review.findOne({title: findReview.title}, function (err, review){
+                                if(err){
+                                    res.status(404).json({success: false, message: "error! cant find review"});
+                                }else{
+                                    res.status(200).json({success: true, title: review.title, name: review.name, quote: review.quote, rating: review.rating});
+                                }
+                            })
+                        }
                     } else {
                         res.status(404).json({success: false, message: "movie not found"});
-
                     }
                 })
             }
@@ -145,17 +159,31 @@ router.route('/movies')
         if(!req.body.title || !req.body.yearReleased || !req.body.genre || !req.body.actors[0] || !req.body.actors[1] || !req.body.actors[2]) {
             res.json({success: false, message: "title, released year, genre, and three actors required"});
         }else{
-            var mov = new Movie();
+            var movie = new Movie();
 
-            mov.title = req.body.title;
-            mov.yearReleased = req.body.yearReleased;
-            mov.genre = req.body.genre;
-            mov.actors = req.body.actors;
+            movie.title = req.body.title;
+            movie.yearReleased = req.body.yearReleased;
+            movie.genre = req.body.genre;
+            movie.actors = req.body.actors;
 
-            mov.save(function (err) {
+            movie.save(function (err) {
                 if (err) {
                     res.status(401).send({success: false, message: "unexpected error occurred."})
                 }else{
+                    if(req.body.reviews === "true") {
+                        var findReview = new Review();
+                        findReview.title = req.body.title;
+                        findReview.name = req.body.name;
+                        findReview.quote = req.body.quote;
+                        findReview.rating = req.body.rating;
+                        findReview.save(function (err){
+                            if(err){
+                                res.status(401).send({success: false, message: "cant save review"});
+                            }else {
+                                res.status(200).send({success: true, message: "movie and review successfully added"});
+                            }
+                        })
+                    }
                     res.status(200).send({success: true, message: "movie successfully added"})
                 }
             })
@@ -166,6 +194,7 @@ router.route('/movies')
     .all(function(req, res){
         res.json({success:false, message: "route not supported"});
     })
+
 app.use('/', router);
 app.listen(process.env.PORT || 8080);
 module.exports = app; // for testing only
