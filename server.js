@@ -1,5 +1,5 @@
 /*
-CSC3916 HW3
+CSC3916 HW4
 File: Server.js
 Description: Web API scaffolding for Movie API
  */
@@ -170,20 +170,19 @@ router.route('/movies')
                 if (err) {
                     res.status(401).send({success: false, message: "unexpected error occurred."})
                 }else{
-                    if(req.body.reviews === "true") {
-                        var findReview = new Review();
-                        findReview.title = req.body.title;
-                        findReview.name = req.body.name;
-                        findReview.quote = req.body.quote;
-                        findReview.rating = req.body.rating;
-                        findReview.save(function (err){
-                            if(err){
-                                res.status(401).send({success: false, message: "cant save review"});
-                            }else {
-                                res.status(200).send({success: true, message: "movie and review successfully added"});
-                            }
-                        })
-                    }
+                    var findReview = new Review();
+                    findReview.title = req.body.title;
+                    findReview.name = req.body.name;
+                    findReview.quote = req.body.quote;
+                    findReview.rating = req.body.rating;
+                    findReview.save(function (err){
+                        if(err){
+                            res.status(401).send({success: false, message: "cant save review"});
+                        }else {
+                            res.status(200).send({success: true, message: "movie and review successfully added"});
+                        }
+
+                    })
                     res.status(200).send({success: true, message: "movie successfully added"})
                 }
             })
