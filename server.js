@@ -195,7 +195,7 @@ router.route('/movies')
 
 router.route('/reviews')
     .get(function (req, res){
-        if(req.query.reviews == "true"){
+        if(req.query.review == "true"){
             Movie.findOne({title: req.body.title}, function(err, movie){
                 if(!movie){
                     return res.status(400).json({success: false, message: "movie doesnt exist"});
