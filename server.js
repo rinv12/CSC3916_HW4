@@ -180,7 +180,7 @@ router.route('/reviews')
                 }if(review){
                     res.status(200).json({success: true, message: "review found", Review: review})
                 }else{
-                    res.status(404).json({success: falsem, message: "cant find a review"});
+                    res.status(404).json({success: false, message: "cant find a review"});
                 }
             })
         }
