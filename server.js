@@ -131,22 +131,11 @@ router.route('/movies')
                     if (err) {
                         res.status(403).json({success: false, message: "unable to find movie"});
                     }
-                    else if (movie) {
-                        res.status(200).json({success: true, message: "movie found", Movie: movie});
-                            var findReview = new Review();
-                            findReview.title = req.body.title;
-                            findReview.name = req.body.username;
-                            findReview.quote = req.body.quote;
-                            findReview.rating = req.body.rating;
-                            Review.findOne({title: findReview.title}, function (err, review){
-                                if(err){
-                                    res.status(404).json({success: false, message: "error! cant find review"});
-                                }else{
-                                    res.status(200).json({success: true, title: review.title, name: review.name, quote: review.quote, rating: review.rating});
-                                }
-                            })
+                    if (movie) {
+                        res.status(200).json({success: true, message: "movie found", Movie: movie})
                     } else {
                         res.status(404).json({success: false, message: "movie not found"});
+
                     }
                 })
             }
@@ -168,19 +157,6 @@ router.route('/movies')
                 if (err) {
                     res.status(401).send({success: false, message: "unexpected error occurred."})
                 }else{
-                    var findReview = new Review();
-                    findReview.title = req.body.title;
-                    findReview.name = req.body.name;
-                    findReview.quote = req.body.quote;
-                    findReview.rating = req.body.rating;
-                    findReview.save(function (err){
-                        if(err){
-                            res.status(401).send({success: false, message: "cant save review"});
-                        }else {
-                            res.status(200).send({success: true, message: "movie and review successfully added"});
-                        }
-
-                    })
                     res.status(200).send({success: true, message: "movie successfully added"})
                 }
             })
@@ -195,28 +171,18 @@ router.route('/movies')
 
 router.route('/reviews')
     .get(function (req, res){
-        if(req.query.review == "true"){
-            Movie.findOne({title: req.body.title}, function(err, movie){
-                if(!movie){
-                    return res.status(400).json({success: false, message: "movie doesnt exist"});
-                }else if(err){
-                    return res.status(400).json({success: false, message: "unable to find movie"});
+        if(!req.body){
+            res.json({success: false, message: "cant find a review for the movie"});
+        }else{
+            Review.findOne(req.body).select("title user comment rating").exec(function (err, review){
+                if(err){
+                    res.status(403).json({success: false, message: "unable to find any review"});
+                }if(review){
+                    res.status(200).json({success: true, message: "review found", Review: review})
                 }else{
-                    Movie.aggregate([
-                        {$match : {title: req.body.title}},
-                        {$lookup : {from: "reviews", localField: "title", foreignField: "title", as : "review"}},
-                        {$addField: {movieRating: {$avg: "$review.rating"}}}
-                    ]).exec(function (err, movie){
-                        if (err){
-                            return res.json(err);
-                        }else{
-                            return res.json(movie);
-                        }
-                    })
+                    res.status(404).json({success: falsem, message: "cant find a review"});
                 }
             })
-        }else{
-            res.json({success: false, message: "provide movie title"});
         }
     })
     .post(authJwtController.isAuthenticated, function (req,res){
