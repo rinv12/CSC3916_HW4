@@ -171,16 +171,37 @@ router.route('/movies')
 
 router.route('/reviews')
     .get(function (req, res){
-        if(!req.body){
+        if(!req.body.title){
             res.json({success: false, message: "cant find a review for the movie"});
-        }else{
-            Review.findOne(req.body).select("title user comment rating").exec(function (err, review){
+        }else if(req.query.reviews == "true"){
+            Movie.findOne({title: req.body.title}, function (err, movie){
                 if(err){
-                    res.status(403).json({success: false, message: "unable to find any review"});
-                }if(review){
-                    res.status(200).json({success: true, message: "review found", Review: review})
+                    return res.status(400).json({success: false, message: "cant find movie"});
+                }else if(!movie){
+                    return  res.status(400).json({success: false, message: "movie not in database"});
                 }else{
-                    res.status(404).json({success: false, message: "cant find a review"});
+                    Movie.aggregate([
+                        {$match :
+                                {title: req.body.title}},
+                        {$lookup:
+                                {from: "reviews", localField: "title", foreignField: "title", as:"review"}},
+                        {$addFields:
+                                {averageRate: {$avg: "$review.rating"}}}
+                    ]).exec(function(err, movie){
+                        if(err){
+                            return res.json(err);
+                        }else{
+                            return res.json(movie);
+                        }
+                    })
+                }
+            })
+        }else{
+            Movie.find({title: req.body.title}).select("title yearReleased genre actors").exec(function(err, movie){
+                if(err){
+                    return res.status(404).json({success: false, message: "cant find movie"});
+                }else{
+                    return res.status(200).json({success: true, message: "movie found", Movie: movie});
                 }
             })
         }
