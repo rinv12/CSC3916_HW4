@@ -14,13 +14,13 @@ try {
 mongoose.set('useCreateIndex', true);
 
 //user schema
-var UserSchema = new Schema({
+var userSchema = new Schema({
     name: String,
     username: { type: String, required: true, index: { unique: true }},
     password: { type: String, required: true, select: false }
 });
 
-UserSchema.pre('save', function(next) {
+userSchema.pre('save', function(next) {
     var user = this;
 
     //hash the password
@@ -35,7 +35,7 @@ UserSchema.pre('save', function(next) {
     });
 });
 
-UserSchema.methods.comparePassword = function (password, callback) {
+userSchema.methods.comparePassword = function (password, callback) {
     var user = this;
 
     bcrypt.compare(password, user.password, function(err, isMatch) {
@@ -44,4 +44,4 @@ UserSchema.methods.comparePassword = function (password, callback) {
 }
 
 //return the model to server
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', userSchema);

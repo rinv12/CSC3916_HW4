@@ -1,24 +1,24 @@
 {
-  "name": "csc3916_hw3",
+  "name": "csc3916_hw4",
   "version": "1.0.0",
-  "description": "Web API 3916 Homework 3",
+  "description": "Web API 3916 Homework 4",
   "main": "server.js",
   "scripts": {
     "test": "mocha --timeout 10000 --exit"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shawnmccarthy/CSC3916_HW3.git"
+    "url": "git+https://github.com/rinv12/CSC3916_HW4.git"
   },
   "keywords": [
     "Movie"
   ],
-  "author": "Shawn McCarthy",
+  "author": "Loureen Viloria",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shawnmccarthy/CSC3916_HW3/issues"
+    "url": "https://github.com/rinv12/CSC3916_HW4/issues"
   },
-  "homepage": "https://github.com/shawnmccarthy/CSC3916_HW3#readme",
+  "homepage": "https://github.com/rinv12/CSC3916_HW4#readme",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.19.0",

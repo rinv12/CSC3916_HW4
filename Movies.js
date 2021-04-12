@@ -5,7 +5,7 @@ var bcrypt = require('bcrypt-nodejs');
 mongoose.Promise = global.Promise;
 
 try{
-    mongoose.connect(process.env.DB, {useNewUrlParser: true, useUnifiedTopology: true}, () =>
+    mongoose.connect(process.env.DB, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}, () =>
         console.log('connected'));
 }catch (error){
     console.log('cannot connect');
@@ -27,6 +27,10 @@ var movieSchema = new Schema({
         type: String,
         required: true,
         enum:["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Thriller", "Western"],
+    },
+    imageUrl:{
+        type: String,
+        required: false
     },
     actors:
         [
