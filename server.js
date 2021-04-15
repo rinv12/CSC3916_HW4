@@ -1,4 +1,5 @@
 /*
+Loureen Viloria
 CSC3916 HW4
 File: Server.js
 Description: Web API scaffolding for Movie API
@@ -15,6 +16,9 @@ var User = require('./Users');
 var Movie = require('./Movies');
 var Review = require('./Reviews');
 
+//new
+const fs = require('fs');
+const mongoose = require("mongoose");
 var app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -79,7 +83,7 @@ router.route('/signin')
                 res.send(err);
             }
 
-            user.comparePassword(userNew.password, function(isMatch) {
+            User.comparePassword(userNew.password, function(isMatch) {
                 if (isMatch) {
                     var userToken = { id: user.id, username: user.username};
                     var token = jwt.sign(userToken, process.env.SECRET_KEY);
@@ -168,7 +172,6 @@ router.route('/movies')
         res.json({success:false, message: "route not supported"});
     })
 
-
 router.route('/reviews')
     .get(function (req, res){
         if(!req.body.title){
@@ -230,6 +233,52 @@ router.route('/reviews')
                             return res.json({success: true, message: "review saved"});
                         }
                     })
+                }
+            })
+        }
+    })
+
+router.route('/movies/:movie_title')
+    .get(authJwtController.isAuthenticated, function (req, res){
+        if(req.query && req.query.reviews && req.query.reviews === "true"){
+            Movie.findOne({title: req.params.movie_title}, function (err, movie){
+                if(err){
+                    return res.status(404).json({success:false, message: "Unable to find movie"});
+                }else if(!movie){
+                    return res.status(403).json({success: false, message: "Movie doesn't exist"});
+                }else{
+                    Movie.aggregate([{
+                        $match: {title: mongoose.Types.string(movie.title)}
+                    },{
+                        $lookup: {
+                            from: "reviews",
+                            localField: "title",
+                            foreignField: "movie_title",
+                            as: "MovieReview"
+                        }
+                    },
+                        {
+                            $addFields:{
+                                AverageReviews: {$avg: "$MovieReview.rating"}
+                            }
+                        }
+                        ]).exec(function(err,movie){
+                            if(err){
+                                return res.json(err);
+                            }else{
+                                return res.json({movie: movie});
+                            }
+                    })
+                }
+            })
+        }else{
+            Movie.find({title: req.params.movie_title}).select("title yearReleased genre actors").exec(function(err, movie){
+                if(err){
+                    return res.status(404).json({success: false, message: "unable to find movie"});
+                }else if(movie.length <= 0){
+                    return res.status(403).json({success: false, message: "movie doesn't exist"});
+                }else{
+                    return res.status(200).json({success: true, message: "Movie found", Movie: movie})
                 }
             })
         }
